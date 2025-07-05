@@ -2,6 +2,7 @@ import time
 import sys
 import threading
 import re
+import curses
 
 # Définir vos constantes de couleur ici
 CLR_RESET  = "\033[0m"
@@ -15,7 +16,8 @@ CLR_CYAN   = "\033[36m"
 CLR_WHITE  = "\033[37m"
 
 class PomodoroTimer:
-    def __init__(self):
+    def __init__(self, stdscr):
+
         self.total_work_time = 0        # secondes de travail total
         self.remaining_time = 0    # secondes restantes dans la phase
         self.state = 'work'      # 'work', 'break', 'paused', 'overtime'
@@ -25,11 +27,14 @@ class PomodoroTimer:
         self.work_mode = (50, 10)  # (minutes_travail, minutes_pause)
         self.cycles_completed = 0
         self.last_time_update = time.time()
+        self.win = curses.newwin(20, 70, 5, 5)
 
     def set_work_mode(self, mode_tuple):
         self.work_mode = mode_tuple
 
     def start(self):
+        curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLACK)
+        self.win.bkgd(' ', curses.color_pair(2))
         self.state = 'work'
         self.remaining_time = self.work_mode[0] * 60
         self.last_time_update = time.time()
@@ -105,23 +110,26 @@ class PomodoroTimer:
             over_time_str = '+' + time.strftime("%M:%S", time.gmtime(int(self.overwork_time)))
         else: 
             over_time_str = '      '
-
-        print(f"       {CLR_CYAN}             {CLR_BLACK}POMODORO CLOCK{CLR_CYAN}")
-        print(f"       {CLR_BLACK}        ╚═══════════════════╝")
-        print(f"       {CLR_CYAN}╔═{display_mode}═════════════════════╗ {CLR_CYAN}┌[mode]┐")
-        
-        print(f"       {CLR_GREEN}║ [{progress_bar}] {pct_progress_bar:3d}%    ║{CLR_GREEN}=║  {CLR_YELLOW}{self.work_mode[0]:02d}  ║")
-        
-        print(f"       {CLR_RESET}║ ➜            {remaining_time_str}    {CLR_GREEN}{over_time_str}   ║=║  {CLR_YELLOW}{self.work_mode[1]:02d}  ║")
-        
-        print(f"       {CLR_CYAN}╚══════╔══════╔═══════╔══════╔═══╝ {CLR_CYAN}└──────┘")
-        print(f"       {CLR_CYAN}┌─────────────────┐┌─────────────────┘───┘─┐")
-        
-        print(f"       │ {CLR_GREEN}Pomodoros: {CLR_RESET}{self.cycles_completed:3d}  ││ {CLR_GREEN}Total Work: {total_work_time_str}  │")
-        print(f"       {CLR_CYAN}└─────────────────┘└───────────────────────┘")
-        print(f"cmd : ")
+        y = 3
+        self.win.addstr(0, 1, f"                    POMODORO CLOCK", curses.color_pair(1))
+        self.win.addstr(1, 1, f"               ╚═══════════════════╝")
+        self.win.addstr(y, 1,f"       ╔═{display_mode}═════════════════════╗ ┌[mode]┐", curses.color_pair(1))
+        y+=1
+        self.win.addstr(y, 1,f"       ║ [{progress_bar}] {pct_progress_bar:3d}%    ║=║  {self.work_mode[0]:02d}  ║", curses.color_pair(1))
+        y+=1
+        self.win.addstr(y, 1,f"       ║ ➜            {remaining_time_str}    {over_time_str}   ║=║  {self.work_mode[1]:02d}  ║", curses.color_pair(1))
+        y+=1
+        self.win.addstr(y, 1,f"       ╚══════╔══════╔═══════╔══════╔═══╝ └──────┘", curses.color_pair(1))
+        y+=1
+        self.win.addstr(y, 1,f"       ┌─────────────────┐┌─────────────────┘───┘─┐", curses.color_pair(1))
+        y+=1
+        self.win.addstr(y, 1,f"       │ Pomodoros: {self.cycles_completed:3d}  ││ Total Work: {total_work_time_str}  │", curses.color_pair(1))
+        y+=1
+        self.win.addstr(y, 1,f"       └─────────────────┘└───────────────────────┘", curses.color_pair(1))
+        y+=1
+        self.win.addstr(y, 1,f"cmd : ", curses.color_pair(1))
         #print(f"{CLR_BLACK}\n  pause| resume| skip| reset| mode| quit |save |load : {CLR_RESET}", end="", flush=True)
-
+        self.win.refresh()
 def input_listener(pomodoro: PomodoroTimer):
     while True:
         cmd = input().strip().lower()
@@ -151,8 +159,8 @@ def input_listener(pomodoro: PomodoroTimer):
         elif cmd in ("quit", "q"):
             break
         
-def main():
-    pomodoro = PomodoroTimer()
+def main(stdscr):
+    pomodoro = PomodoroTimer(stdscr)
     pomodoro.start()
 
     listener = threading.Thread(target=input_listener, args=(pomodoro,), daemon=True)
@@ -169,4 +177,4 @@ def main():
     print("\nPomodoro timer stopped.")
 
 if __name__ == "__main__":
-    main()
+    curses.wrapper(main)
