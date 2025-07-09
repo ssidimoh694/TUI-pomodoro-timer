@@ -17,7 +17,7 @@ CLR_CYAN   = "\033[36m"
 CLR_WHITE  = "\033[37m"
 
 class PomodoroTimer:
-    def __init__(self, stdscr):
+    def __init__(self, main_window_size, main_window_pos, stdscr):
 
         self.total_work_time = 0        # secondes de travail total
         self.remaining_time = 0    # secondes restantes dans la phase
@@ -31,7 +31,7 @@ class PomodoroTimer:
         self.state = 'work'
         self.remaining_time = self.work_mode[0] * 60
 
-        self.win = curses.newwin(14, 70, 0, 0)
+        self.win = curses.newwin(main_window_size[0], main_window_size[1], main_window_pos[0], main_window_pos[1])
         curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_WHITE)
         self.win.bkgd(' ', curses.color_pair(2))
         curses.curs_set(0)
@@ -66,14 +66,11 @@ class PomodoroTimer:
     def update(self):
         now = time.time()
         elapsed = now - self.last_time_update
-        print_debug(f" elapsed : {elapsed}")
         if self.isPaused != True:
             if not self.isovertime:
                 self.remaining_time -= elapsed
-                print_debug(f"remaining time : {self.remaining_time}")
             if self.state == 'work':
                 self.total_work_time += elapsed
-                print_debug(f"added total work : {self.total_work_time}")
 
         if self.remaining_time <= 0 and self.state == 'work' and not self.isovertime:
             self.cycles_completed += 1

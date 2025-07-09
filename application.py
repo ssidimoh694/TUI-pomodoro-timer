@@ -5,13 +5,18 @@ import time
 import curses
 from stats import Stats
 
+main_window_size = (14, 70)
+main_window_pos = (0,0)
+cmd_window_size = (3, 70)
+cmd_window_pos = (14, 0)
+
 class Application:
     def __init__(self, stdscr):
         self.stdscr = stdscr
-        self.timer = PomodoroTimer(stdscr)
+        self.timer = PomodoroTimer(main_window_size, main_window_pos, stdscr)
         self.state = "timer"
-        self.cmd_handler = CmdHandler(self)
-        self.stats = Stats(self)
+        self.cmd_handler = CmdHandler(cmd_window_size, cmd_window_pos, self)
+        self.stats = Stats(main_window_size, main_window_pos, self)
         self.refresh_queue = []
 
     def main(self):
@@ -24,8 +29,6 @@ class Application:
                 self.timer.update()
                 if(self.state == 'timer'):
                     self.refresh_queue.append(self.timer.draw)
-                if(self.state == 'stats'):
-                    self.refresh_queue.append(self.stats.draw)
                 # Attente que le lock soit libéré
                 time.sleep(1)
         except KeyboardInterrupt:
@@ -41,9 +44,9 @@ class Application:
             time.sleep(1)
     
 class CmdHandler:
-    def __init__(self, application: Application):
+    def __init__(self, cmd_window_size, cmd_window_pos, application: Application):
         self.application = application
-        self.win = curses.newwin(3, 70, 14, 0) 
+        self.win = curses.newwin(cmd_window_size[0], cmd_window_size[1], cmd_window_pos[0], cmd_window_pos[1]) 
         self.win.border('|', '|', '-', '-', '+', '+', '+', '+')
         self.win.bkgd(' ', curses.color_pair(0))
         self.win.addstr(1, 1, "cmd: ")
@@ -58,6 +61,7 @@ class CmdHandler:
             if(cmd == 'stats'):
                 self.application.state = 'stats'
                 self.application.refresh_queue.append(self.application.timer.win.clear)
+                self.application.refresh_queue.append(self.application.stats.draw)
             elif(cmd == 'timer'):
                 self.application.state = 'timer'
                 self.application.refresh_queue.append(self.application.stats.win.clear)
@@ -82,3 +86,5 @@ if __name__ == "__main__":
         app.main()
 
     curses.wrapper(run_app)
+
+#a regler : changer le mode, ecrire les donner dans stats.csv, couleurs affichages, peut voir stats de plusieurs semaine en arrière

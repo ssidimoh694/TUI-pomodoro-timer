@@ -1,112 +1,117 @@
 import curses
 from datetime import datetime
+from helper import print_debug
+import csv
 
 days = ["Monday", "Tuesday", "Wednesday",
             "Thursday", "Friday", "Saturday", "Sunday"]
-max_height = 24        # 24 rows == 12h at ½h precision
-col_w = 4              # each day‐column is 4 chars wide
-x0 = 6                 # leave room for Y axis labels
-y0 = 1 
+
+day_to_number = {
+    "Monday": 1,
+    "Tuesday": 2,
+    "Wednesday": 3,
+    "Thursday": 4,
+    "Friday": 5,
+    "Saturday": 6,
+    "Sunday": 7
+}
+VERTICAL_PADDING = 2
+HORIZONTAL_PADDING = 3
+STEP_SIZE = 9
+BAR_WIDTH = 4
 class Stats:
-    def __init__(self, application):
-        self.win = curses.newwin(14, 70, 0, 0)
+    def __init__(self, main_window_size, main_window_pos, application):
+        self.win = curses.newwin(main_window_size[0], main_window_size[1], main_window_pos[0], main_window_pos[1])
         self.win.bkgd(' ', curses.color_pair(2))
-        #self.win.border('|', '|', '-', '-', '+', '+', '+', '+')
         self.stats_file_path = "stats.csv"
 
+    def draw(self): 
+        stats = self.loadWeekStats()
+        print_debug(str(stats))
+        stats = [(day, float(seconds) / 3600) for day, _, seconds in stats]
+        print_debug(str(stats))
+        for day in days:
+            index = day_to_number[day] - 1
+            if index >= len(stats) or stats[index][0] != day:
+                stats.insert(index, (day, 0))
+        print_debug(str(stats))
+        yx = self.win.getbegyx()
+        maxyx = self.win.getmaxyx()
 
-    def drawa(self):
-        self.win.addstr(1, 1, "Stats")
-        self.win.refresh()
-    
-    def draw(self):
-        self.win.addstr(1, 1, "^", curses.A_BOLD)
-        for i in range(1, 13):
-            self.win.addstr(i + 1, 1, "║")
-
-        self.win.addstr(13, 68, ">", curses.A_BOLD)
-
-        self.win.addstr(13, 1, "╚")
-        for i in range(1, 67):
-            self.win.addstr(13, i + 1, "═")
-
-        # for x in range(7):
-        #     for y in range(11):
-        #         self.win.addstr(x*5 + 2, y, "I$$I")
-        for x in range (6, 66, 9):
-            self.win.addstr(1, x , "╔════╗")
-            for y in range(2, 13):
-                self.win.addstr(y, x, "║::::║")
-
-        self.win.refresh()
-
-        
-
-    def drawv2(self):
-        # load last week stats into a dict
-        stats = dict(self.loadWeekStats())
-        
-        max_height = 24        # 24 rows == 12h at ½h precision
-        col_w = 4              # each day‐column is 4 chars wide
-        x0 = 6                 # leave room for Y axis labels
-        y0 = 1                 # top margin
-
-        # Draw Y axis: every 2h == every 4 rows
-        for i in range(max_height + 1):
-            y = y0 + i
-            # label every 4th row with hours remaining
-            if i % 4 == 0:
-                hours = (max_height - i) // 2
-                self.win.addstr(y, 0, f"{hours:2d}")
+        for i in range(yx[0], maxyx[0]):
+            if i % VERTICAL_PADDING != 0:
+                self.win.addstr(i - 1, yx[1] + HORIZONTAL_PADDING, "|")
             else:
-                self.win.addstr(y, 0, "  ")
-                # vertical axis line
-                self.win.addstr(y, 3, "|")
+                self.win.addstr(i + 1, yx[1] + 1, f"{12 - i:2}┼")
 
-        # Draw top border of columns
-        for dx in range(col_w * len(days)):
-            self.win.addch(y0, x0 + dx, "_")
-
-        # Draw each day‐column
-        for idx, day in enumerate(days):
-            total = float(stats.get(day, 0))
-            blocks = min(int(total * 2), max_height)
-            col_x = x0 + idx * col_w
-            # fill from bottom up
-            for b in range(blocks):
-                y = y0 + max_height - b
-                self.win.addstr(y, col_x, "I$$I")
-                # draw the day label under the column (3 letter abbrev)
-                label = day[:3].center(col_w)
-                self.win.addstr(y0 + max_height + 1, col_x, label)
-
+        for i in range(yx[1], maxyx[1] - HORIZONTAL_PADDING):
+            if i % STEP_SIZE != 0:
+                self.win.addstr(maxyx[0] - VERTICAL_PADDING, i, "─")
+            elif i > yx[1] + HORIZONTAL_PADDING:
+                self.win.addstr(maxyx[0] - VERTICAL_PADDING, i, "┼")
+                day_index = (i // STEP_SIZE) % len(days) - 1
+                day_label = days[day_index][:3]
+                self.win.addstr(maxyx[0] - 1, i - 1, day_label)
+        
+        first_x = ((yx[1] + HORIZONTAL_PADDING) // STEP_SIZE + 1) * STEP_SIZE
+        for x, i in enumerate(range(first_x, maxyx[1] - HORIZONTAL_PADDING, STEP_SIZE)):
+            for y in range(maxyx[0] - VERTICAL_PADDING, maxyx[0] - int(stats[x][1])-VERTICAL_PADDING, -1):
+                self.win.addstr(y, i - 1, "▒" * BAR_WIDTH)
+                    
+        self.win.addstr(maxyx[0] - VERTICAL_PADDING, yx[1] + HORIZONTAL_PADDING, "┼")
         self.win.refresh()
 
-    def add_new_stats(self, total_work):
-        with open(self.stats_file_path, 'a') as file:
-            date = datetime.now().strftime("%A")
-            file.write(f"{date},{total_work}\n")
+    def write_new_stats(self, total_work):
 
-    def loadWeekStats(self):
-        week_stats = []
+        today = datetime.now()
+        day_name = today.strftime("%A")
+        date_str = today.strftime("%d/%m/%y")
         try:
-            with open(self.stats_file_path, 'r') as file:
-                lines = file.readlines()
-                for line in lines:
-                    day, work = line.strip().split(',')
-                    week_stats.append((day, work))
-                    if day == "Monday":
-                        break
+            with open(self.stats_file_path, 'r+b') as f:
+                f.seek(0, 2) 
+                while f.read(1) != b'\n':
+                    f.seek(-2, 1)
+                beg_of_line = f.tell()
+                last_line = f.readline().decode().strip()
+                last_line = last_line.split(',') if last_line else None
+
+                if last_line:
+                    prev_num = day_to_number[last_line[0]]
+                    curr_num = day_to_number[day_name]
+
+                    if last_line[1] == date_str:
+                        f.seek(beg_of_line)
+                        f.write(f"{day_name},{date_str},{total_work}\n".encode())
+                        return
+                    elif curr_num <= prev_num:
+                        f.seek(0, 2)
+                        f.write(f"eow\n".encode())
+                
+                f.seek(0, 2)
+                f.write(f"{day_name},{date_str},{total_work}\n".encode())
+
         except FileNotFoundError:
             pass
-        return week_stats
+
+    def loadWeekStats(self):
+        try:
+            with open(self.stats_file_path, 'rb') as f:
+                f.seek(0, 2)
+                stats = []
+                while f.tell() > 0:
+                    beg_of_line = f.seek(-2, 1)
+                    while f.tell() > 0 and f.read(1) != b'\n':
+                        beg_of_line = f.seek(-2, 1)
+                    line = f.readline().decode().strip()
+                    f.seek(beg_of_line, 0)
+                    if line == "eow":
+                        break
+                    stats.append(line.split(','))
+            stats.reverse()
+            return stats
+        except FileNotFoundError:
+            return None
     
     def handleInput(cmd):
         pass
 
-# Exemple d'utilisation avec curses
-def main(stdscr):
-    curses.curs_set(0)
-    stats = Stats()
-    stats.draw()
-    stdscr.getch()  # Attendre une entrée pour quitter
