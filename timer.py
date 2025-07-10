@@ -1,6 +1,4 @@
 import time
-import sys
-import threading
 import re
 import curses
 from helper import print_debug
@@ -17,8 +15,9 @@ CLR_CYAN   = "\033[36m"
 CLR_WHITE  = "\033[37m"
 
 class PomodoroTimer:
-    def __init__(self, main_window_size, main_window_pos, stdscr):
+    def __init__(self, main_window_size, main_window_pos, cmd_handler):
 
+        self.cmd_handler = cmd_handler
         self.total_work_time = 0        # secondes de travail total
         self.remaining_time = 0    # secondes restantes dans la phase
         self.state = 'work'      # 'work', 'break', 'paused', 'overtime'
@@ -36,8 +35,41 @@ class PomodoroTimer:
         self.win.bkgd(' ', curses.color_pair(2))
         curses.curs_set(0)
 
-    def set_work_mode(self, mode_tuple):
-        self.work_mode = mode_tuple
+    def set_work_mode(self):
+        while True:
+            # Prompt the user for input
+            self.cmd_handler.win.addstr(1, 1, "cmd: Set mode (work-break): ")
+            self.cmd_handler.win.refresh()
+
+            # Read user input
+            curses.echo()
+            user_input = self.cmd_handler.win.getstr(1, 29).decode("utf-8").strip()
+            curses.noecho()
+
+            # Validate the input format (e.g., "50-10")
+            match = re.match(r"^(\d+)-(\d+)$", user_input)
+            if match:
+                work_time, break_time = map(int, match.groups())
+                # Update remaining time based on the new work mode
+                if self.state == 'work':
+                    self.remaining_time = work_time * 60
+                elif self.state == 'break':
+                    self.remaining_time = break_time * 60
+
+                self.work_mode = (work_time, break_time)
+                
+                # Clear the input area
+                self.cmd_handler.win.move(1, 6)
+                _, w = self.cmd_handler.win.getmaxyx()
+                self.cmd_handler.win.addstr(1, 6, " " * (w - 7))
+                self.cmd_handler.win.refresh()
+                break
+            else:
+                self.cmd_handler.win.move(1, 6)
+                _, w = self.cmd_handler.win.getmaxyx()
+                self.cmd_handler.win.addstr(1, 6, " " * (w - 7))
+                self.cmd_handler.win.refresh()
+
         
     def pause(self):
         if self.state in ('work', 'break'):
@@ -101,16 +133,7 @@ class PomodoroTimer:
         elif cmd == "reset":
             self.discard()
         elif cmd == "mode":
-            # exemple : on bascule entre 25|5 et 50|10
-            while True:
-                mode_input = input("Enter new mode in format 'a-b' (e.g., 25-5): ").strip()
-                if re.match(r'^\d+-\d+$', mode_input):
-                    a, b = map(int, mode_input.split('-'))
-                    self.set_work_mode((a, b))
-                    break
-                else:
-                    print("Invalid format. Please use 'a-b' where a and b are numbers.")
-    
+            self.set_work_mode()
     def draw(self):
         self.win.border('|', '|', '-', '-', '+', '+', '+', '+')
         # choix du temps de référence
