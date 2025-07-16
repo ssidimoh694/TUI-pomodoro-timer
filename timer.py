@@ -104,19 +104,19 @@ class PomodoroTimer:
             if self.state == 'work':
                 self.total_work_time += elapsed
 
-        if self.remaining_time <= 0 and self.state == 'work' and not self.isovertime:
-            self.cycles_completed += 1
+        if self.remaining_time <= 0:
+            if self.state == 'work' and not self.isovertime:
+                self.cycles_completed += 1
             self.isovertime = True
             self.remaining_time = 0
-        
         if self.isovertime:
             self.overwork_time += elapsed
 
         self.last_time_update = now
 
-
     def handleInput(self, cmd):
         if cmd == "next":
+            self.isovertime = False
             if self.state == "work":
                 self.begin_break()
             elif self.state == "break":
@@ -125,11 +125,6 @@ class PomodoroTimer:
             self.pause()
         elif cmd == "resume":
             self.resume()
-        elif cmd == "skip":
-            if self.state == "work":
-                self.begin_break()
-            else:
-                self.begin_work()
         elif cmd == "reset":
             self.discard()
         elif cmd == "mode":

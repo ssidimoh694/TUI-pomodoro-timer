@@ -27,12 +27,16 @@ class Application:
         try:
             while listener.is_alive():
                 self.timer.update()
+
+                if(self.timer.total_work_time % 60 == 0):
+                    self.stats.write_new_stats(self.timer.total_work_time)
+                    
                 if(self.state == 'timer'):
                     self.refresh_queue.append(self.timer.draw)
                 # Attente qun_week_state le lock soit libéré
                 time.sleep(1)
         except KeyboardInterrupt:
-            pass
+            self.stats.write_new_stats(self.timer.total_work_time)
 
         print("\nPomodoro timer stopped.")
 
@@ -47,6 +51,9 @@ class CmdHandler:
     def __init__(self, cmd_window_size, cmd_window_pos, application: Application):
         self.application = application
         self.win = curses.newwin(cmd_window_size[0], cmd_window_size[1], cmd_window_pos[0], cmd_window_pos[1]) 
+        self.draw()
+
+    def draw(self):
         self.win.border('|', '|', '-', '-', '+', '+', '+', '+')
         self.win.bkgd(' ', curses.color_pair(0))
         self.win.addstr(1, 1, "cmd: ")
@@ -67,6 +74,8 @@ class CmdHandler:
                 self.application.refresh_queue.append(self.application.stats.win.clear)
 
             elif cmd == 'refresh':
+                self.application.refresh_queue.append(self.win.clear)
+                self.application.refresh_queue.append(self.draw)
                 if self.application.state == 'timer':
                     self.application.refresh_queue.append(self.application.timer.win.clear)
                     self.application.refresh_queue.append(self.application.timer.draw)
