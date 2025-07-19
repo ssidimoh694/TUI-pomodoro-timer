@@ -1,7 +1,7 @@
 import time
 import re
 import curses
-from helper import print_debug
+from src.helper import print_debug
 import math
 # Définir vos constantes de couleur ici
 CLR_RESET  = "\033[0m"

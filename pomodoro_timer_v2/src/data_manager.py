@@ -1,6 +1,7 @@
 import json
 from datetime import date
 from datetime import timedelta
+from src.helper import print_debug
 
 class DataManager:
     """
@@ -26,14 +27,19 @@ class DataManager:
         # Get the absolute path of the JSON file
         year_path_file = self.path_folder + str(year) + ".json"
         week_data = []
-        with open(year_path_file, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            start_date = date.fromisocalendar(year, int(week_nbr), 1)
-            for i in range(7):
-                key = (start_date + timedelta(days=i)).strftime("%d/%m/%Y")
-                if key in data:
-                    week_data.append((key,data[key]))
-
+        try:
+            with open(year_path_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except FileNotFoundError:
+            data = {}
+        start_date = date.fromisocalendar(year, int(week_nbr), 1)
+        for i in range(7):
+            key = (start_date + timedelta(days=i)).strftime("%d/%m/%Y")
+            if key in data:
+                week_data.append((key,data[key]))
+            else:
+                week_data.append((key, 0))
+    
         return week_data
     
     def load_month(self, month_nbr, year) -> list[tuple[str, int]]:
@@ -54,16 +60,21 @@ class DataManager:
         year_path_file = self.path_folder + str(year) + ".json"
        
         month_data = []
-        with open(year_path_file, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            
-            start_date = date(year, int(month_nbr), 1)
-            days_in_month = (date(year, int(month_nbr) + 1, 1) - timedelta(days=1)).day if month_nbr < 12 else 31
+        try:
+            with open(year_path_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except FileNotFoundError:
+            data = {}
+        
+        start_date = date(year, int(month_nbr), 1)
+        days_in_month = (date(year, int(month_nbr) + 1, 1) - timedelta(days=1)).day if month_nbr < 12 else 31
 
-            for i in range(days_in_month):
-                key = (start_date + timedelta(days=i)).strftime("%d/%m/%Y")
-                if key in data:
-                    month_data.append((key,data[key]))
+        for i in range(days_in_month):
+            key = (start_date + timedelta(days=i)).strftime("%d/%m/%Y")
+            if key in data:
+                month_data.append((key,data[key]))
+            else:
+                month_data.append((key, 0))
 
         return month_data
     
@@ -85,10 +96,10 @@ class DataManager:
             with open(year_path_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
         except FileNotFoundError:
-            return None  # Return None if the file does not exist
+            data = {}  # Return None if the file does not exist
 
         key = f"{day_nbr:02}/{month_nbr:02}/{year}"
-        return (key, data.get(key, None))  # Return the value for the key or None if not found
+        return (key, data.get(key, 0))  # Return the value for the key or None if not found
     
     def set_day(self, day_nbr, month_nbr, year, time):
         """
