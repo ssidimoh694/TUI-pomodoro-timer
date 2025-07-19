@@ -1,4 +1,5 @@
-from timer import PomodoroTimer
+from .timer import PomodoroTimer  # Adjusted import path to match the directory structure
+from .data_manager import DataManager
 import curses
 import threading
 import time
@@ -14,6 +15,7 @@ class Application:
     def __init__(self, stdscr):
         self.stdscr = stdscr
         self.state = "timer"
+        self.data_manager = DataManager("data/work_time_")
         self.cmd_handler = CmdHandler(cmd_window_size, cmd_window_pos, self)
         self.timer = PomodoroTimer(main_window_size, main_window_pos, self.cmd_handler)
         self.stats = Stats(main_window_size, main_window_pos)

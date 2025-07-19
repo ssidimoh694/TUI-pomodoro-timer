@@ -33,9 +33,10 @@ class Stats:
         self.current_year_stats_display = self.curr_year
         self.weeks_in_curr_year_display = self.weeks_in_curr_year
 
-    def draw1(self): 
+    def draw(self): 
         stats = self.loadWeekStats()
         stats = [(day, float(seconds) / 3600) for day, _, seconds in stats]
+        
         for day in days:
             index = day_to_number[day] - 1
             if index >= len(stats) or stats[index][0] != day:
@@ -67,7 +68,7 @@ class Stats:
         self.win.addstr(0, 20,get_week_interval(self.current_week_stats_display))
         self.win.refresh()
 
-    def draw(self):
+    def draw1(self):
         self.win.clear()
         maxyx = self.win.getmaxyx()
         yx = self.win.getbegyx()
