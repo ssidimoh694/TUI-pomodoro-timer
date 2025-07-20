@@ -1,22 +1,32 @@
 import time
 import re
 import curses
-from src.helper import print_debug
 import math
-# Définir vos constantes de couleur ici
-CLR_RESET  = "\033[0m"
-CLR_BLACK  = "\033[30m"
-CLR_RED    = "\033[31m"
-CLR_GREEN  = "\033[32m"
-CLR_YELLOW = "\033[33m"
-CLR_BLUE   = "\033[34m"
-CLR_MAGENTA= "\033[35m"
-CLR_CYAN   = "\033[36m"
-CLR_WHITE  = "\033[37m"
 
 class PomodoroTimer:
+    """
+    A class to represent a Pomodoro Timer.
+    Attributes:
+        cmd_handler: The command handler for managing user input and output.
+        total_work_time: Total time spent working in seconds.
+        remaining_time: Remaining time in the current phase in seconds.
+        state: Current state of the timer ('work', 'break', 'paused', 'overtime').
+        isPaused: Boolean indicating if the timer is paused.
+        overwork_time: Time spent in overtime in seconds.
+        isovertime: Boolean indicating if the timer is in overtime.
+        work_mode: Tuple representing work and break durations in minutes.
+        cycles_completed: Number of completed Pomodoro cycles.
+        last_time_update: Timestamp of the last update.
+        win: Curses window object for rendering the timer.
+    """
     def __init__(self, main_window_size, main_window_pos, cmd_handler):
-
+        """
+        Initialize the PomodoroTimer object.
+        Args:
+            main_window_size (tuple): Size of the main window (rows, cols).
+            main_window_pos (tuple): Position of the main window (y, x).
+            cmd_handler: Command handler for managing user input and output.
+        """
         self.cmd_handler = cmd_handler
         self.total_work_time = 0        # secondes de travail total
         self.remaining_time = 0    # secondes restantes dans la phase
@@ -36,6 +46,11 @@ class PomodoroTimer:
         curses.curs_set(0)
 
     def set_work_mode(self):
+        """
+        Set the work and break durations for the Pomodoro timer.
+        Prompts the user to input the work and break durations in the format "work-break".
+        Updates the timer's work mode and remaining time based on the input.
+        """
         while True:
             # Prompt the user for input
             self.cmd_handler.win.addstr(1, 1, "cmd: Set mode (work-break): ")
@@ -70,7 +85,6 @@ class PomodoroTimer:
                 self.cmd_handler.win.addstr(1, 6, " " * (w - 7))
                 self.cmd_handler.win.refresh()
 
-        
     def pause(self):
         if self.state in ('work', 'break'):
             self.isPaused = True
@@ -83,6 +97,11 @@ class PomodoroTimer:
         self.remaining_time = 0
         self.state = 'paused'
     
+    def reset(self):
+        self.total_work_time = 0
+        self.remaining_time = self.work_mode[0]*60
+        self.isPaused = True
+
     def begin_break(self):
         self.state = "break"
         self.remaining_time = self.work_mode[1] * 60
@@ -115,20 +134,22 @@ class PomodoroTimer:
         self.last_time_update = now
 
     def handleInput(self, cmd):
-        if cmd == "next":
+        if cmd in "next":
             self.isovertime = False
             if self.state == "work":
                 self.begin_break()
             elif self.state == "break":
                 self.begin_work()
-        if cmd == "pause":
+        if cmd in "pause":
             self.pause()
-        elif cmd == "resume":
+        elif cmd in "resume":
             self.resume()
-        elif cmd == "reset":
-            self.discard()
-        elif cmd == "mode":
+        elif cmd in "reset":
+            self.reset()
+        elif cmd in "mode":
             self.set_work_mode()
+        elif cmd in "help":
+            self.help()
     def draw(self):
         self.win.border('|', '|', '-', '-', '+', '+', '+', '+')
         # choix du temps de référence

@@ -34,7 +34,7 @@ class Stats:
         self.win.bkgd(' ', curses.color_pair(2))
         self.state = "week"
         for i, color_index in enumerate(range(255, 231, -2), start=20):  # Indices de couleurs 255 à 232
-            curses.init_pair(i, curses.COLOR_YELLOW, color_index)  # Foreground: Yellow, Background: Gradient
+            curses.init_pair(i, curses.COLOR_CYAN, color_index)  # Foreground: Yellow, Background: Gradient
         self.date = datetime.now()
         curses.init_pair(10, 254, curses.COLOR_WHITE)  # Foreground: Light grey, Background: White
    
@@ -45,13 +45,20 @@ class Stats:
             self.draw_week(data_manager)
 
     def draw_week(self, data_manager : DataManager): 
+
         stats = data_manager.load_week(self.date.isocalendar().week, self.date.year)
+
         start_date = datetime.strptime(stats[0][0], "%d/%m/%Y")
         end_date = datetime.strptime(stats[6][0], "%d/%m/%Y")
         week_info_str = f"week from {start_date.strftime('%B')} {start_date.day}th to {end_date.strftime('%B')} {end_date.day}th"
-        self.win.addstr(0, 20, week_info_str)
-        stats = [float(seconds) / 3600 for _, seconds in stats]
 
+        stats = [float(seconds) / 3600 for _, seconds in stats]
+        mean_work_hours = sum(stats) / len(stats)
+        mean_hours = int(mean_work_hours)
+        mean_minutes = int((mean_work_hours - mean_hours) * 60)
+        mean_work_hours = f"{mean_hours}h{mean_minutes:02d}"
+
+        self.win.addstr(0, 20, week_info_str + f" (~{mean_work_hours})")
         yx = self.win.getbegyx()
         maxyx = self.win.getmaxyx()
 
@@ -135,9 +142,14 @@ class Stats:
                 day_counter += 1
 
         # Add the name of the month at position (0, 20)
+        mean_work_hours = sum(stats) / len(stats)
+        mean_hours = int(mean_work_hours)
+        mean_minutes = int((mean_work_hours - mean_hours) * 60)
+        mean_work_hours = f"{mean_hours}h{mean_minutes:02d}"
+
         month_name = self.date.strftime("%B")
         year = self.date.year
-        self.win.addstr(0, 32, f"{month_name} {year}")
+        self.win.addstr(0, 32, f"{month_name} {year} (~{mean_work_hours})")
         self.win.refresh()
 
     def handleInput(self, cmd):
