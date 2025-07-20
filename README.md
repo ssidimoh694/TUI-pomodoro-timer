@@ -41,33 +41,6 @@ Before running the application, ensure you have the following:
             pip install windows-curses
             ```
 
-## Setup
-
-1.  **Clone the Repository**:
-
-    ```bash
-    git clone [repository_url]
-    cd pomodoro_timer_v2
-    ```
-
-2.  **Create a Virtual Environment (Recommended)**:
-
-    ```bash
-    python3 -m venv venv
-    source venv/bin/activate  # On Linux/macOS
-    venv\Scripts\activate  # On Windows
-    ```
-
-3.  **Install Dependencies (if any)**:
-
-    If you have a `requirements.txt` file, install the dependencies:
-
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-    If you don't have a `requirements.txt` file, make sure you have the necessary libraries installed. For this project, you'll need:
-
     *   `datetime` (usually pre-installed)
     *   `json` (usually pre-installed)
     *   `curses` (see above for installation instructions)
@@ -86,12 +59,6 @@ Before running the application, ensure you have the following:
     python3 src/application.py
     ```
 
-    Alternatively, you can run it as a module:
-
-    ```bash
-    python3 -m src.application
-    ```
-
 ## Application Tutorial
 
 ### Initializing the Application
@@ -104,7 +71,7 @@ The main screen is divided into several sections:
 
 *   **Timer Display**: Shows the remaining time in the current phase (work or break).
 *   **Statistics**: Displays total work time and completed cycles.
-*   **Controls**: Lists available commands and their functions.
+*   **Controls**: commands line interface.
 
 ### Using the Pomodoro Timer
 
@@ -118,19 +85,25 @@ The main screen is divided into several sections:
 
 3.  **Customizing the Timer**:
 
-    *   You can customize the work and break durations in the code (in `src/timer.py`).
+    *   You can customize the work and break durations.
 
 4.  **Viewing Statistics**:
 
-    *   The total work time and completed cycles are displayed on the screen.
+    *   The total work time and completed cycles are displayed on the screen on weekly or monthly basis.
 
 ### Available Commands
 
 The following commands are available during runtime:
 
-*   `p`: Pause/Resume the timer.
-*   `q`: Quit the application.
-*   `h`: Display help information.
+*   `pause`: Pause the timer.
+*   `next`: skip current working phase
+*   `resume`: resume the timer
+*   `ctrl^c`: Quit the application.
+*   `help`: Display all commands.
+*   `stats` : go in stat window, display weekly work hours
+*   `month` : dksplay monthly work hours
+*   `week` : go back to weekly work hours
+*   `timer` : go back to pomorodo clock from stats window
 
 ### Data Storage
 
