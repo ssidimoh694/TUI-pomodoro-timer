@@ -105,6 +105,7 @@ The following commands are available during runtime:
 *   `ctrl^c`: Quit the application.
 *   `help`: Display all commands.
 *   `stats` : go in stat window, display weekly work hours
+*   `<-,->`: navigate in monthy or weekly stats
 *   `month` : dksplay monthly work hours
 *   `week` : go back to weekly work hours
 *   `timer` : go back to pomorodo clock from stats window
