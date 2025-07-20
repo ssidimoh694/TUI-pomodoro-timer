@@ -12,6 +12,10 @@ This is a command-line Pomodoro Timer application built with Python and the `cur
 *   **Visual Interface**: Uses `curses` for a terminal-based user interface.
 *   **Data Persistence**: Saves work time data to JSON files.
 *   **Color Gradients**: Uses ANSI escape codes and curses color pairs for visual appeal.
+<img width="330" height="127" alt="image" src="https://github.com/user-attachments/assets/a2988e6d-ad2b-4a72-8dd3-6ed511185f86" />
+<img width="330" height="127" alt="image" src="https://github.com/user-attachments/assets/7d4e6909-7a02-4979-9fba-279f4c05771c" />
+<img width="330" height="127" alt="image" src="https://github.com/user-attachments/assets/40e986d6-78ac-4c62-aaab-4eb298f61b90" />
+
 
 ## Requirements
 
