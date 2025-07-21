@@ -24,6 +24,7 @@ class Application:
         self.refresh_queue = []
 
     def main(self):
+        self.refresh_queue.append(self.timer.draw)
         listener = threading.Thread(target=self.cmd_handler.handle_input, daemon=True)
         display = threading.Thread(target=self.draw, daemon=True)
         listener.start()
