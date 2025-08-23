@@ -85,6 +85,43 @@ class PomodoroTimer:
                 self.cmd_handler.win.addstr(1, 6, " " * (w - 7))
                 self.cmd_handler.win.refresh()
 
+    def set_time(self):
+        """
+        Set the work and break durations for the Pomodoro timer.
+        Prompts the user to input the work and break durations in the format "work-break".
+        Updates the timer's work mode and remaining time based on the input.
+        """
+        while True:
+            # Prompt the user for input
+            self.cmd_handler.win.addstr(1, 1, "cmd: Set time (hour:min): ")
+            self.cmd_handler.win.refresh()
+
+            # Read user input
+            curses.echo()
+            user_input = self.cmd_handler.win.getstr(1, 29).decode("utf-8").strip()
+            curses.noecho()
+
+            # Validate the input format (e.g., "8:10")
+            match = re.match(r"^(\d{1,2}):(\d{1,2})$", user_input)
+            if match:
+                hours, minutes = map(int, match.groups())
+                if hours < 24 and minutes < 60:
+                    self.total_work_time = hours*3600 + minutes*60
+                else:
+                    match = None
+                
+                # Clear the input area
+                self.cmd_handler.win.move(1, 6)
+                _, w = self.cmd_handler.win.getmaxyx()
+                self.cmd_handler.win.addstr(1, 6, " " * (w - 7))
+                self.cmd_handler.win.refresh()
+                break
+            else:
+                self.cmd_handler.win.move(1, 6)
+                _, w = self.cmd_handler.win.getmaxyx()
+                self.cmd_handler.win.addstr(1, 6, " " * (w - 7))
+                self.cmd_handler.win.refresh()
+
     def pause(self):
         if self.state in ('work', 'break'):
             self.isPaused = True
@@ -145,6 +182,8 @@ class PomodoroTimer:
             self.pause()
         elif cmd in "resume":
             self.resume()
+        elif cmd in "set":
+            self.set_time()
         elif cmd in "reset":
             self.reset()
         elif cmd in "mode":

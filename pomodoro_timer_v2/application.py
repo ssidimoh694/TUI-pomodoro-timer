@@ -7,9 +7,9 @@ import curses
 from src.stats import Stats
 from datetime import datetime
 
-main_window_size = (14, 70)
+main_window_size = (14, 71)
 main_window_pos = (0,0)
-cmd_window_size = (3, 70)
+cmd_window_size = (3, 71)
 cmd_window_pos = (14, 0)
 
 class Application:

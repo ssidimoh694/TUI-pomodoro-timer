@@ -3,7 +3,8 @@ from datetime import datetime, timedelta, date
 from src.helper import print_debug
 import csv
 from src.data_manager import DataManager
-
+import time
+import math
 days = ["Monday", "Tuesday", "Wednesday",
             "Thursday", "Friday", "Saturday", "Sunday"]
 
@@ -46,14 +47,14 @@ class Stats:
 
     def draw_week(self, data_manager : DataManager): 
 
-        stats = data_manager.load_week(self.date.isocalendar().week, self.date.year)
+        orig_stats = data_manager.load_week(self.date.isocalendar().week, self.date.year)
 
-        start_date = datetime.strptime(stats[0][0], "%d/%m/%Y")
-        end_date = datetime.strptime(stats[6][0], "%d/%m/%Y")
+        start_date = datetime.strptime(orig_stats[0][0], "%d/%m/%Y")
+        end_date = datetime.strptime(orig_stats[6][0], "%d/%m/%Y")
         week_info_str = f"week from {start_date.strftime('%B')} {start_date.day}th to {end_date.strftime('%B')} {end_date.day}th"
 
-        stats = [float(seconds) / 3600 for _, seconds in stats]
-        mean_work_hours = sum(stats) / len(stats)
+        stats = [float(seconds) / 3600 for _, seconds in orig_stats]
+        mean_work_hours = sum(stats) / (self.date.weekday() + 1)
         mean_hours = int(mean_work_hours)
         mean_minutes = int((mean_work_hours - mean_hours) * 60)
         mean_work_hours = f"{mean_hours}h{mean_minutes:02d}"
@@ -79,19 +80,26 @@ class Stats:
                 self.win.addstr(maxyx[0] - VERTICAL_PADDING, i, "┴")
                 day_index = (i // STEP_SIZE) % len(days) - 1
                 day_label = days[day_index][:3]
-                self.win.addstr(maxyx[0] - 1, i - 1, day_label)
+                self.win.addstr(maxyx[0] - 1, i - 1, day_label )
+                total_seconds = math.ceil(orig_stats[day_index][1])
+                hours = total_seconds // 3600
+                minutes = (total_seconds % 3600) // 60
+                time_str = f"-{hours}:{minutes}"
+                if(total_seconds != 0):
+                    self.win.addstr(maxyx[0] - 1, i - 1 + 3, time_str)
+
         
 
         first_x = ((yx[1] + HORIZONTAL_PADDING) // STEP_SIZE + 1) * STEP_SIZE
         for x, i in enumerate(range(first_x, maxyx[1] - HORIZONTAL_PADDING, STEP_SIZE)):
-            for y in range(maxyx[0] - VERTICAL_PADDING, maxyx[0] - int(stats[x])-VERTICAL_PADDING, -1):
+            for y in range(maxyx[0] - VERTICAL_PADDING, maxyx[0] - min(int(stats[x]), 12)-VERTICAL_PADDING, -1):
                 if y == maxyx[0] - int(stats[x])-VERTICAL_PADDING +1 and int(stats[x]) != 1:
                     self.win.addstr(y, i - 1, "▄" * BAR_WIDTH)
                 elif y == maxyx[0] - VERTICAL_PADDING:
                     self.win.addstr(y, i - 1, "▀" * BAR_WIDTH)
                 else:
                     self.win.addstr(y, i - 1, "█" * BAR_WIDTH)
-                    
+
         self.win.addstr(maxyx[0] - VERTICAL_PADDING, yx[1] + HORIZONTAL_PADDING, "┼")
 
         self.win.refresh()
@@ -134,7 +142,7 @@ class Stats:
                 x_pos = HORIZONTAL_PADDING + day * grid_width + grid_width // 2
                 y_pos = VERTICAL_PADDING + week * grid_height + grid_height // 2 -1
                 day_time = stats[day_counter - 1]
-                color_id = int(day_time + 20)
+                color_id = min(int(day_time + 20), 32)
                 self.win.addstr(y_pos, x_pos - 3, "   ", curses.color_pair(color_id))  # Left padding
                 self.win.addstr(y_pos, x_pos + 2, "    ", curses.color_pair(color_id))  # Right padding
                 self.win.addstr(y_pos + 1, x_pos - 3, "         ", curses.color_pair(color_id))  # Bottom padding
@@ -142,7 +150,7 @@ class Stats:
                 day_counter += 1
 
         # Add the name of the month at position (0, 20)
-        mean_work_hours = sum(stats) / len(stats)
+        mean_work_hours = sum(stats) / ((self.date - self.date.replace(day=1)).days + 1)
         mean_hours = int(mean_work_hours)
         mean_minutes = int((mean_work_hours - mean_hours) * 60)
         mean_work_hours = f"{mean_hours}h{mean_minutes:02d}"
