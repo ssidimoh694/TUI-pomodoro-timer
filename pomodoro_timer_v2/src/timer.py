@@ -120,6 +120,9 @@ class PomodoroTimer:
         if self.isPaused != True:
             if not self.isovertime:
                 self.remaining_time -= elapsed
+            else:
+                self.overwork_time += elapsed
+                
             if self.state == 'work':
                 self.total_work_time += elapsed
 
@@ -128,8 +131,6 @@ class PomodoroTimer:
                 self.cycles_completed += 1
             self.isovertime = True
             self.remaining_time = 0
-        if self.isovertime:
-            self.overwork_time += elapsed
 
         self.last_time_update = now
 

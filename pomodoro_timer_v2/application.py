@@ -95,6 +95,7 @@ class CmdHandler:
                 self.application.refresh_queue.append(lambda: self.application.stats.draw(self.application.data_manager))
             elif(cmd in 'timer'):
                 self.application.state = 'timer'
+                self.application.stats.state = 'week'
                 self.application.refresh_queue.append(self.application.stats.win.clear)
 
             elif cmd == 'refresh':
@@ -126,12 +127,10 @@ if __name__ == "__main__":
     def run_app(stdscr):
         app = Application()
         app.main()
-        app.cmd_handler.win.getch()  # Wait for user input before exiting
+        #app.cmd_handler.win.getch()  # Wait for user input before exiting
 
     curses.wrapper(run_app)
 
-#next step : clean handle input, clean code add comment and documentation
-#add color for prettier terminal
-#create clean git repository with explantion on how it works for cliens
-#add buttons for stats, week, month
-#lean about ascii representations for terminal compatibilities
+#add hour on each column
+#if hour decimal bigger than .75 round up
+#for mean month and week work hour compute only mean until current day whole week/month.
