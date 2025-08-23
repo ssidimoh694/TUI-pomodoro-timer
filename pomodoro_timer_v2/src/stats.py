@@ -110,7 +110,7 @@ class Stats:
         yx = self.win.getbegyx()
 
         # Calculate grid dimensions
-        grid_width = (maxyx[1] - HORIZONTAL_PADDING // 2) // 7
+        grid_width = (maxyx[1] -1 - HORIZONTAL_PADDING // 2) // 7 #added -1 here because changed window width from 70 to 71
         grid_height = (maxyx[0] - VERTICAL_PADDING // 2) // 5
 
         # Get the current month and year
