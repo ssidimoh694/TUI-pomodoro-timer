@@ -109,6 +109,7 @@ The following commands are available during runtime:
 *   `month` : dksplay monthly work hours
 *   `week` : go back to weekly work hours
 *   `timer` : go back to pomorodo clock from stats window
+*   `set` : can set current work time
 We can enter partial commands and it will guess closest one. For e.g "n" instead of "next", or "r" or "res" insteand of "resume"
 ### Data Storage
 
