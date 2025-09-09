@@ -230,7 +230,7 @@ class PomodoroTimer:
         y+=1
         self.win.addstr(y, x,f"       ┌─────────────────┐┌─────────────────┘───┘─┐", curses.color_pair(2))
         y+=1
-        self.win.addstr(y, x,f"       │ Pomodoros: {self.cycles_completed:3d}  ││ Total Work: {total_work_time_str}  │", curses.color_pair(2))
+        self.win.addstr(y, x,f"       │ Pomodoros: {self.total_work_time/(self.work_mode[0]*60):.1f}  ││ Total Work: {total_work_time_str}  │", curses.color_pair(2))
         y+=1
         self.win.addstr(y, x,f"       └─────────────────┘└───────────────────────┘", curses.color_pair(2))
         y+=1

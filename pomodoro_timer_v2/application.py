@@ -23,22 +23,27 @@ class Application:
         self.stats = Stats(main_window_size, main_window_pos)
         self.refresh_queue = []
 
-    def main(self):
-        self.refresh_queue.append(self.timer.draw)
-        listener = threading.Thread(target=self.cmd_handler.handle_input, daemon=True)
-        display = threading.Thread(target=self.draw, daemon=True)
-        listener.start()
-        display.start()
-        try:
-            while listener.is_alive():
-                self.timer.update()
-
-                if(self.state == 'timer'):
-                    self.refresh_queue.append(self.timer.draw)
-                time.sleep(1)
-        except KeyboardInterrupt:
-            curr_date = datetime.now()
-            self.data_manager.set_day(curr_date.day, curr_date.month, curr_date.year, int(self.timer.total_work_time))
+            def main(self):
+                self.refresh_queue.append(self.timer.draw)
+                listener = threading.Thread(target=self.cmd_handler.handle_input, daemon=True)
+                display = threading.Thread(target=self.draw, daemon=True)
+                listener.start()
+                display.start()
+                save_counter = 0  # Initialize a counter for saving data
+                try:
+                    while listener.is_alive():
+                        self.timer.update()
+                        if self.state == 'timer':
+                            self.refresh_queue.append(self.timer.draw)
+                        save_counter += 1  # Increment the counter
+                        if save_counter >= 600:  # Check if the counter reaches 600
+                            curr_date = datetime.now()
+                            self.data_manager.set_day(curr_date.day, curr_date.month, curr_date.year, int(self.timer.total_work_time))
+                            save_counter = 0  # Reset the counter after saving
+                        time.sleep(1)
+                except KeyboardInterrupt:
+                    curr_date = datetime.now()
+                    self.data_manager.set_day(curr_date.day, curr_date.month, curr_date.year, int(self.timer.total_work_time))
 
     def draw(self):
         while True:
@@ -131,6 +136,6 @@ if __name__ == "__main__":
 
     curses.wrapper(run_app)
 
-#add hour on each column
-#if hour decimal bigger than .75 round up
-#for mean month and week work hour compute only mean until current day whole week/month.
+#bugs : 
+#when go from week to month and back to week, mean work time is wrong
+#debug : i think because when come back to current week, current_day is the one of mondy, not the current day of the week
