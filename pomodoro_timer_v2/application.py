@@ -70,9 +70,8 @@ class CmdHandler:
         self.draw()
 
     def draw(self):
-        self.win.border('|', '|', '-', '-', '+', '+', '+', '+')
         self.win.bkgd(' ', curses.color_pair(1))
-        self.win.addstr(1, 1, "cmd: ", curses.color_pair(1))
+        self.win.addstr(1, 1, "cmd:> ", curses.color_pair(1))
 
     def help(self):
         """
@@ -83,7 +82,7 @@ class CmdHandler:
         # Prompt the user for input
         self.win.addstr(1, 1, "cmd: refresh-next-pause;stats-month-week-left arrow-right arrow")
         self.win.refresh()
-        self.win.getstr(1, 29).decode("utf-8").strip()
+        self.win.getstr(1, 30).decode("utf-8").strip()
 
         
     def handle_input(self):
@@ -92,7 +91,7 @@ class CmdHandler:
             self.application.refresh_queue.append(self.win.refresh)
 
             curses.echo()  # Activer l'écho pour afficher les caractères saisis
-            cmd = self.win.getstr(1, 6).decode("utf-8").strip()  # Lire la commande
+            cmd = self.win.getstr(1, 7).decode("utf-8").strip()  # Lire la commande
             curses.noecho()
 
             if(cmd in 'stats'):
@@ -105,6 +104,7 @@ class CmdHandler:
             elif(cmd in 'timer'):
                 self.application.state = 'timer'
                 self.application.stats.state = 'week'
+                self.application.stats.display_date = datetime.now()
                 self.application.refresh_queue.append(self.application.stats.win.clear)
 
             elif cmd == 'refresh':
@@ -124,11 +124,11 @@ class CmdHandler:
                 self.application.stats.handleInput(cmd)
                 self.application.refresh_queue.append(self.application.stats.win.clear)
                 self.application.refresh_queue.append(lambda: self.application.stats.draw(self.application.data_manager))
-            
-            self.win.move(1, 6)
+
+            self.win.move(1, 7)
             _, w = self.win.getmaxyx()
             # Clear only the input area, preserving borders
-            self.win.addstr(1, 6, " " * (w - 7))
+            self.win.addstr(1, 7, " " * (w - 7))
             
             time.sleep(1)
             

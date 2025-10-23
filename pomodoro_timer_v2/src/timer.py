@@ -167,7 +167,7 @@ class PomodoroTimer:
             if self.state == 'work' and not self.isovertime:
                 self.cycles_completed += 1
                 # Launch Firefox with the break_time.html file
-                subprocess.Popen(["firefox", "--new-window", "/home/anas/Documents/myFiles/devProjects/pomodoro-timer/pomodoro_timer_v2/break_time.html"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                subprocess.Popen(["firefox", "--new-window", "--kiosk", "/home/anas/Documents/myFiles/devProjects/pomodoro-timer/pomodoro_timer_v2/break_time.html"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             self.isovertime = True
             self.remaining_time = 0
 

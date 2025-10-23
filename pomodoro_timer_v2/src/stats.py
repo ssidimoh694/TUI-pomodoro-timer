@@ -8,22 +8,6 @@ import math
 days = ["Monday", "Tuesday", "Wednesday",
             "Thursday", "Friday", "Saturday", "Sunday"]
 
-CLR_GRADIENT_WHITE_TO_BLACK = [
-    "\033[38;5;255m",  # Bright white
-    "\033[38;5;254m",
-    "\033[38;5;253m",
-    "\033[38;5;252m",
-    "\033[38;5;251m",
-    "\033[38;5;250m",
-    "\033[38;5;249m",
-    "\033[38;5;248m",
-    "\033[38;5;247m",
-    "\033[38;5;246m",
-    "\033[38;5;245m",
-    "\033[38;5;244m",  # Dark gray
-    "\033[38;5;232m"   # Black
-]
-
 VERTICAL_PADDING = 2
 HORIZONTAL_PADDING = 3
 STEP_SIZE = 9
@@ -40,7 +24,8 @@ class Stats:
         self.display_date = self.date
         curses.start_color()  # Ensure curses color functionality is initialized
         curses.use_default_colors()
-        curses.init_pair(10, curses.COLOR_BLACK, -1)  # Foreground: Light grey, Background: Black
+        curses.init_color(11, 500, 500, 500)  # Define a light grey color (RGB: 50%, 50%, 50%)
+        curses.init_pair(10, 11, -1)  # Foreground: Light grey, Background: Default
    
     def draw(self, data_manager : DataManager):
         if self.state == "month":
@@ -78,7 +63,7 @@ class Stats:
                 # Fill the window with a very long light gray string
                 if(i < maxyx[0] - VERTICAL_PADDING):
                     long_string = "─" * (maxyx[1] - yx[1] - HORIZONTAL_PADDING*2)
-                    self.win.addstr(i + 1, yx[1] + 4, long_string, curses.color_pair(color_pair))
+                    self.win.addstr(i + 1, yx[1] + 4, long_string, curses.color_pair(10))
 
         for i in range(yx[1], maxyx[1] - HORIZONTAL_PADDING):
             if i % STEP_SIZE != 0:
@@ -91,7 +76,7 @@ class Stats:
                 total_seconds = math.ceil(orig_stats[day_index][1])
                 hours = total_seconds // 3600
                 minutes = (total_seconds % 3600) // 60
-                time_str = f"-{hours}:{minutes}"
+                time_str = f"-{hours}:{minutes:02d}"
                 if(total_seconds != 0):
                     self.win.addstr(maxyx[0] - 1, i - 1 + 3, time_str)
 
@@ -165,7 +150,7 @@ class Stats:
         mean_minutes = int((mean_work_hours - mean_hours) * 60)
         mean_work_hours = f"{mean_hours}h{mean_minutes:02d}"
 
-        month_name = self.date.strftime("%B")
+        month_name = self.display_date.strftime("%B")
         year = self.date.year
         self.win.addstr(0, 32, f"{month_name} {year} (~{mean_work_hours})")
         self.win.refresh()
@@ -173,10 +158,8 @@ class Stats:
     def handleInput(self, cmd):
         if cmd == "month":
             self.state = "month"
-            self.display_date = self.date
         elif cmd == "week":
             self.state = "week"
-            self.display_date = self.date
         if cmd == "[C":  # Right arrow key
             if self.state == "week":
                 self.display_date = self.display_date + timedelta(days=7)

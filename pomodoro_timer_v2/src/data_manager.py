@@ -102,8 +102,8 @@ class DataManager:
 
         key = f"{day_nbr:02}/{month_nbr:02}/{year}"
         return (key, data.get(key, 0))  # Return the value for the key or None if not found
-    
-    def set_day(self, day_nbr, month_nbr, year, time):
+
+    def set_day(self, day_nbr, month_nbr, year, time: int):
         """
         Set or overwrite data for a specific day.
         Args:
