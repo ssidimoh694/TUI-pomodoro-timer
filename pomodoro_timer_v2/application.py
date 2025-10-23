@@ -22,28 +22,32 @@ class Application:
         self.timer.total_work_time = self.data_manager.load_day(today.day, today.month, today.year)[1]
         self.stats = Stats(main_window_size, main_window_pos)
         self.refresh_queue = []
+        curses.start_color()
+        curses.use_default_colors()
+        curses.init_pair(1, curses.COLOR_WHITE, -1)  # Red text, transparent background
 
-            def main(self):
-                self.refresh_queue.append(self.timer.draw)
-                listener = threading.Thread(target=self.cmd_handler.handle_input, daemon=True)
-                display = threading.Thread(target=self.draw, daemon=True)
-                listener.start()
-                display.start()
-                save_counter = 0  # Initialize a counter for saving data
-                try:
-                    while listener.is_alive():
-                        self.timer.update()
-                        if self.state == 'timer':
-                            self.refresh_queue.append(self.timer.draw)
-                        save_counter += 1  # Increment the counter
-                        if save_counter >= 600:  # Check if the counter reaches 600
-                            curr_date = datetime.now()
-                            self.data_manager.set_day(curr_date.day, curr_date.month, curr_date.year, int(self.timer.total_work_time))
-                            save_counter = 0  # Reset the counter after saving
-                        time.sleep(1)
-                except KeyboardInterrupt:
+
+    def main(self):
+        self.refresh_queue.append(self.timer.draw)
+        listener = threading.Thread(target=self.cmd_handler.handle_input, daemon=True)
+        display = threading.Thread(target=self.draw, daemon=True)
+        listener.start()
+        display.start()
+        save_counter = 0  # Initialize a counter for saving data
+        try:
+            while listener.is_alive():
+                self.timer.update()
+                if self.state == 'timer':
+                    self.refresh_queue.append(self.timer.draw)
+                save_counter += 1  # Increment the counter
+                if save_counter >= 600:  # Check if the counter reaches 600
                     curr_date = datetime.now()
                     self.data_manager.set_day(curr_date.day, curr_date.month, curr_date.year, int(self.timer.total_work_time))
+                    save_counter = 0  # Reset the counter after saving
+                time.sleep(1)
+        except KeyboardInterrupt:
+            curr_date = datetime.now()
+            self.data_manager.set_day(curr_date.day, curr_date.month, curr_date.year, int(self.timer.total_work_time))
 
     def draw(self):
         while True:
@@ -67,8 +71,8 @@ class CmdHandler:
 
     def draw(self):
         self.win.border('|', '|', '-', '-', '+', '+', '+', '+')
-        self.win.bkgd(' ', curses.color_pair(0))
-        self.win.addstr(1, 1, "cmd: ")
+        self.win.bkgd(' ', curses.color_pair(1))
+        self.win.addstr(1, 1, "cmd: ", curses.color_pair(1))
 
     def help(self):
         """

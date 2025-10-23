@@ -28,16 +28,19 @@ VERTICAL_PADDING = 2
 HORIZONTAL_PADDING = 3
 STEP_SIZE = 9
 BAR_WIDTH = 4
-
+color_pair = 1
 class Stats:
     def __init__(self, main_window_size, main_window_pos):
         self.win = curses.newwin(main_window_size[0], main_window_size[1], main_window_pos[0], main_window_pos[1])
-        self.win.bkgd(' ', curses.color_pair(2))
+        self.win.bkgd(' ', curses.color_pair(1))
         self.state = "week"
         for i, color_index in enumerate(range(255, 231, -2), start=20):  # Indices de couleurs 255 à 232
             curses.init_pair(i, curses.COLOR_CYAN, color_index)  # Foreground: Yellow, Background: Gradient
         self.date = datetime.now()
-        curses.init_pair(10, 254, curses.COLOR_WHITE)  # Foreground: Light grey, Background: White
+        self.display_date = self.date
+        curses.start_color()  # Ensure curses color functionality is initialized
+        curses.use_default_colors()
+        curses.init_pair(10, curses.COLOR_BLACK, -1)  # Foreground: Light grey, Background: Black
    
     def draw(self, data_manager : DataManager):
         if self.state == "month":
@@ -47,14 +50,18 @@ class Stats:
 
     def draw_week(self, data_manager : DataManager): 
 
-        orig_stats = data_manager.load_week(self.date.isocalendar().week, self.date.year)
+        orig_stats = data_manager.load_week(self.display_date.isocalendar().week, self.display_date.year)
 
         start_date = datetime.strptime(orig_stats[0][0], "%d/%m/%Y")
         end_date = datetime.strptime(orig_stats[6][0], "%d/%m/%Y")
         week_info_str = f"week from {start_date.strftime('%B')} {start_date.day}th to {end_date.strftime('%B')} {end_date.day}th"
 
         stats = [float(seconds) / 3600 for _, seconds in orig_stats]
-        mean_work_hours = sum(stats) / (self.date.weekday() + 1)
+        if self.display_date.isocalendar().week < self.date.isocalendar().week:
+            mean_work_hours = sum(stats) / 7
+        else:
+            mean_work_hours = sum(stats) / (self.date.weekday() + 1)
+
         mean_hours = int(mean_work_hours)
         mean_minutes = int((mean_work_hours - mean_hours) * 60)
         mean_work_hours = f"{mean_hours}h{mean_minutes:02d}"
@@ -65,19 +72,19 @@ class Stats:
 
         for i in range(yx[0], maxyx[0]):
             if i % VERTICAL_PADDING != 0:
-                self.win.addstr(i - 1, yx[1] + HORIZONTAL_PADDING, "|")
+                self.win.addstr(i - 1, yx[1] + HORIZONTAL_PADDING, "|", curses.color_pair(color_pair))
             else:
-                self.win.addstr(i + 1, yx[1] + 1, f"{12 - i:2}┼")
+                self.win.addstr(i + 1, yx[1] + 1, f"{12 - i:2}┼", curses.color_pair(color_pair))
                 # Fill the window with a very long light gray string
                 if(i < maxyx[0] - VERTICAL_PADDING):
                     long_string = "─" * (maxyx[1] - yx[1] - HORIZONTAL_PADDING*2)
-                    self.win.addstr(i + 1, yx[1] + 4, long_string, curses.color_pair(10))
+                    self.win.addstr(i + 1, yx[1] + 4, long_string, curses.color_pair(color_pair))
 
         for i in range(yx[1], maxyx[1] - HORIZONTAL_PADDING):
             if i % STEP_SIZE != 0:
-                self.win.addstr(maxyx[0] - VERTICAL_PADDING, i, "─")
+                self.win.addstr(maxyx[0] - VERTICAL_PADDING, i, "─", curses.color_pair(color_pair))
             elif i > yx[1] + HORIZONTAL_PADDING:
-                self.win.addstr(maxyx[0] - VERTICAL_PADDING, i, "┴")
+                self.win.addstr(maxyx[0] - VERTICAL_PADDING, i, "┴", curses.color_pair(color_pair))
                 day_index = (i // STEP_SIZE) % len(days) - 1
                 day_label = days[day_index][:3]
                 self.win.addstr(maxyx[0] - 1, i - 1, day_label )
@@ -94,13 +101,13 @@ class Stats:
         for x, i in enumerate(range(first_x, maxyx[1] - HORIZONTAL_PADDING, STEP_SIZE)):
             for y in range(maxyx[0] - VERTICAL_PADDING, maxyx[0] - min(int(stats[x]), 12)-VERTICAL_PADDING, -1):
                 if y == maxyx[0] - int(stats[x])-VERTICAL_PADDING +1 and int(stats[x]) != 1:
-                    self.win.addstr(y, i - 1, "▄" * BAR_WIDTH)
+                    self.win.addstr(y, i - 1, "▄" * BAR_WIDTH, curses.color_pair(color_pair))
                 elif y == maxyx[0] - VERTICAL_PADDING:
-                    self.win.addstr(y, i - 1, "▀" * BAR_WIDTH)
+                    self.win.addstr(y, i - 1, "▀" * BAR_WIDTH, curses.color_pair(color_pair))
                 else:
-                    self.win.addstr(y, i - 1, "█" * BAR_WIDTH)
+                    self.win.addstr(y, i - 1, "█" * BAR_WIDTH, curses.color_pair(color_pair))
 
-        self.win.addstr(maxyx[0] - VERTICAL_PADDING, yx[1] + HORIZONTAL_PADDING, "┼")
+        self.win.addstr(maxyx[0] - VERTICAL_PADDING, yx[1] + HORIZONTAL_PADDING, "┼", curses.color_pair(color_pair))
 
         self.win.refresh()
 
@@ -118,7 +125,7 @@ class Stats:
         current_month = today.month
         current_year = today.year
 
-        stats = data_manager.load_month(self.date.month, self.date.year)
+        stats = data_manager.load_month(self.display_date.month, self.date.year)
         # Extract the first and last weekday numbers from the stats array
         first_weekday = datetime.strptime(stats[0][0], "%d/%m/%Y").weekday()
         days_in_month = len(stats)
@@ -150,7 +157,10 @@ class Stats:
                 day_counter += 1
 
         # Add the name of the month at position (0, 20)
-        mean_work_hours = sum(stats) / ((self.date - self.date.replace(day=1)).days + 1)
+        if self.display_date.month < self.date.month:
+            mean_work_hours = sum(stats) / len(stats)
+        else:
+            mean_work_hours = sum(stats) / ((self.date - self.date.replace(day=1)).days + 1)
         mean_hours = int(mean_work_hours)
         mean_minutes = int((mean_work_hours - mean_hours) * 60)
         mean_work_hours = f"{mean_hours}h{mean_minutes:02d}"
@@ -163,17 +173,19 @@ class Stats:
     def handleInput(self, cmd):
         if cmd == "month":
             self.state = "month"
+            self.display_date = self.date
         elif cmd == "week":
             self.state = "week"
+            self.display_date = self.date
         if cmd == "[C":  # Right arrow key
             if self.state == "week":
-                self.date = self.date + timedelta(days=7)
+                self.display_date = self.display_date + timedelta(days=7)
             elif self.state == "month":
-                next_month = self.date.replace(day=28) + timedelta(days=4)  # Go to next month
-                self.date = next_month.replace(day=1)  # Set to the first day of the next month
+                next_month = self.display_date.replace(day=28) + timedelta(days=4)  # Go to next month
+                self.display_date = next_month.replace(day=1)  # Set to the first day of the next month
         elif cmd == "[D":  # Left arrow key
             if self.state == "week":
-                self.date = self.date - timedelta(days=7)
+                self.display_date = self.display_date - timedelta(days=7)
             elif self.state == "month":
-                prev_month = self.date.replace(day=1) - timedelta(days=1)  # Go to the last day of the previous month
-                self.date = prev_month.replace(day=1)  # Set to the first day of the previous month
+                prev_month = self.display_date.replace(day=1) - timedelta(days=1)  # Go to the last day of the previous month
+                self.display_date = prev_month.replace(day=1)  # Set to the first day of the previous month

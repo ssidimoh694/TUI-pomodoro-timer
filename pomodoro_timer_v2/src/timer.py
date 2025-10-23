@@ -2,6 +2,7 @@ import time
 import re
 import curses
 import math
+import subprocess
 
 class PomodoroTimer:
     """
@@ -41,8 +42,7 @@ class PomodoroTimer:
         self.remaining_time = self.work_mode[0] * 60
 
         self.win = curses.newwin(main_window_size[0], main_window_size[1], main_window_pos[0], main_window_pos[1])
-        curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_WHITE)
-        self.win.bkgd(' ', curses.color_pair(2))
+        self.win.bkgd(' ', curses.color_pair(1))
         curses.curs_set(0)
 
     def set_work_mode(self):
@@ -166,6 +166,8 @@ class PomodoroTimer:
         if self.remaining_time <= 0:
             if self.state == 'work' and not self.isovertime:
                 self.cycles_completed += 1
+                # Launch Firefox with the break_time.html file
+                subprocess.Popen(["firefox", "--new-window", "/home/anas/Documents/myFiles/devProjects/pomodoro-timer/pomodoro_timer_v2/break_time.html"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             self.isovertime = True
             self.remaining_time = 0
 
@@ -219,19 +221,19 @@ class PomodoroTimer:
             over_time_str = '      '
         y = 3
         x = 6
-        self.win.addstr(1, x, "                    POMODORO CLOCK", curses.color_pair(2) | curses.A_BOLD)
-        self.win.addstr(y, x,f"       ╔═{display_mode}═════════════════════╗ ┌[mode]┐", curses.color_pair(2))
+        self.win.addstr(1, x, "                    POMODORO CLOCK", curses.color_pair(1) | curses.A_BOLD)
+        self.win.addstr(y, x,f"       ╔═{display_mode}═════════════════════╗ ┌[mode]┐", curses.color_pair(1))
         y+=1
-        self.win.addstr(y, x,f"       ║ [{progress_bar}] {pct_progress_bar:3d}%    ║=║  {self.work_mode[0]:02d}  ║", curses.color_pair(2))
+        self.win.addstr(y, x,f"       ║ [{progress_bar}] {pct_progress_bar:3d}%    ║=║  {self.work_mode[0]:02d}  ║", curses.color_pair(1))
         y+=1
-        self.win.addstr(y, x,f"       ║ ➜            {remaining_time_str}    {over_time_str}   ║=║  {self.work_mode[1]:02d}  ║", curses.color_pair(2))
+        self.win.addstr(y, x,f"       ║ ➜            {remaining_time_str}    {over_time_str}   ║=║  {self.work_mode[1]:02d}  ║", curses.color_pair(1))
         y+=1    
-        self.win.addstr(y, x,f"       ╚══════╔══════╔═══════╔══════╔═══╝ └──────┘", curses.color_pair(2))
+        self.win.addstr(y, x,f"       ╚══════╔══════╔═══════╔══════╔═══╝ └──────┘", curses.color_pair(1))
         y+=1
-        self.win.addstr(y, x,f"       ┌─────────────────┐┌─────────────────┘───┘─┐", curses.color_pair(2))
+        self.win.addstr(y, x,f"       ┌─────────────────┐┌─────────────────┘───┘─┐", curses.color_pair(1))
         y+=1
-        self.win.addstr(y, x,f"       │ Pomodoros: {self.total_work_time/(self.work_mode[0]*60):.1f}  ││ Total Work: {total_work_time_str}  │", curses.color_pair(2))
+        self.win.addstr(y, x,f"       │ Pomodoros: {self.total_work_time/(self.work_mode[0]*60):.1f}  ││ Total Work: {total_work_time_str}  │", curses.color_pair(1))
         y+=1
-        self.win.addstr(y, x,f"       └─────────────────┘└───────────────────────┘", curses.color_pair(2))
+        self.win.addstr(y, x,f"       └─────────────────┘└───────────────────────┘", curses.color_pair(1))
         y+=1
         self.win.refresh()
