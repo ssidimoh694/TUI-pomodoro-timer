@@ -193,7 +193,6 @@ class PomodoroTimer:
         elif cmd in "help":
             self.help()
     def draw(self):
-        self.win.border('|', '|', '-', '-', '+', '+', '+', '+')
         # choix du temps de référence
         phase_minutes = self.work_mode[0] if self.state == 'work' else self.work_mode[1]
 
@@ -219,9 +218,9 @@ class PomodoroTimer:
             over_time_str = '+' + time.strftime("%M:%S", time.gmtime(int(self.overwork_time)))
         else: 
             over_time_str = '      '
-        y = 3
+        y = 5
         x = 6
-        self.win.addstr(1, x, "                    POMODORO CLOCK", curses.color_pair(1) | curses.A_BOLD)
+        self.win.addstr(y-3, x, "                    POMODORO CLOCK", curses.color_pair(1) | curses.A_BOLD)
         self.win.addstr(y, x,f"       ╔═{display_mode}═════════════════════╗ ┌[mode]┐", curses.color_pair(1))
         y+=1
         self.win.addstr(y, x,f"       ║ [{progress_bar}] {pct_progress_bar:3d}%    ║=║  {self.work_mode[0]:02d}  ║", curses.color_pair(1))

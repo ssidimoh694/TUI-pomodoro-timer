@@ -2,6 +2,7 @@ import json
 from datetime import date
 from datetime import timedelta
 from src.helper import print_debug
+import os
 
 class DataManager:
     """
@@ -31,7 +32,8 @@ class DataManager:
             with open(year_path_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
         except FileNotFoundError:
-            data = {}
+            data = {}  # Return empty list if the file does not exist
+
         start_date = date.fromisocalendar(year, int(week_nbr), 1)
         for i in range(7):
             key = (start_date + timedelta(days=i)).strftime("%d/%m/%Y")
@@ -64,7 +66,7 @@ class DataManager:
             with open(year_path_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
         except FileNotFoundError:
-            data = {}
+            data = {}  # Return empty list if the file does not exist
         
         start_date = date(year, int(month_nbr), 1)
         days_in_month = (date(year, int(month_nbr) + 1, 1) - timedelta(days=1)).day if month_nbr < 12 else 31
@@ -120,14 +122,12 @@ class DataManager:
                 data = json.load(f)
         except FileNotFoundError:
             data = {}
-            with open(year_path_file, 'w', encoding='utf-8') as f:
-                json.dump(data, f, ensure_ascii=False, indent=4)
-
+            
         key = f"{day_nbr:02}/{month_nbr:02}/{year}"
         data[key] = time  # Assuming the value is an integer representing seconds
+        
+        self.safe_write(year_path_file, data)
 
-        with open(year_path_file, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
 
     def update_day(self, day_nbr, month_nbr, year, time: int):
         """
@@ -148,8 +148,6 @@ class DataManager:
                 data = json.load(f)
         except FileNotFoundError:
             data = {}
-            with open(year_path_file, 'w', encoding='utf-8') as f:
-                json.dump(data, f, ensure_ascii=False, indent=4)
 
         key = f"{day_nbr:02}/{month_nbr:02}/{year}"
         if key in data:
@@ -157,5 +155,20 @@ class DataManager:
         else:
             data[key] = time  # Initialize with the given time
 
-        with open(year_path_file, 'w', encoding='utf-8') as f:
+        self.safe_write(year_path_file, data)
+
+    def safe_write(self, year_path_file: str, data: dict):
+        """
+        Safely write data to a JSON file by first writing to a temporary file
+        and then replacing the original file.
+        Args:
+            year_path_file (str): The path to the JSON file.
+            data (dict): The data to write to the file.
+        Returns:
+            None
+        """
+        temp_file = year_path_file + ".tmp"
+        with open(temp_file, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
+        os.replace(temp_file, year_path_file)
+    
