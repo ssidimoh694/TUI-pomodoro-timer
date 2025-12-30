@@ -1,0 +1,14 @@
+# Python byte-compiled files / caches
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# pytest / mypy caches
+.pytest_cache/
+.mypy_cache/
+
+# dossier de données — ignorer data à la racine et le sous-dossier du package
+pomodoro_timer_v2/data/
+
+debug.txt
