@@ -9,6 +9,4 @@ __pycache__/
 .mypy_cache/
 
 # dossier de données — ignorer data à la racine et le sous-dossier du package
-pomodoro_timer_v2/data/
-
 debug.txt
