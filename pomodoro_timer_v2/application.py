@@ -107,7 +107,7 @@ class CmdHandler:
                 self.application.stats.display_date = datetime.now()
                 self.application.refresh_queue.append(self.application.stats.win.clear)
 
-            elif cmd == 'refresh':
+            elif cmd == 'ref':
                 self.application.refresh_queue.append(self.win.clear)
                 self.application.refresh_queue.append(self.draw)
                 if self.application.state == 'timer':

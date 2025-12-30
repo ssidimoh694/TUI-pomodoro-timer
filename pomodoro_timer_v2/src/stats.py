@@ -84,8 +84,8 @@ class Stats:
 
         first_x = ((yx[1] + HORIZONTAL_PADDING) // STEP_SIZE + 1) * STEP_SIZE
         for x, i in enumerate(range(first_x, maxyx[1] - HORIZONTAL_PADDING, STEP_SIZE)):
-            for y in range(maxyx[0] - VERTICAL_PADDING, maxyx[0] - min(int(stats[x]), 12)-VERTICAL_PADDING, -1):
-                if y == maxyx[0] - int(stats[x])-VERTICAL_PADDING +1 and int(stats[x]) != 1:
+            for y in range(maxyx[0] - VERTICAL_PADDING, maxyx[0] - min(int(stats[x] + 0.283), 12)-VERTICAL_PADDING, -1):
+                if y == maxyx[0] - int(stats[x] + 0.283)-VERTICAL_PADDING +1 and int(stats[x]) != 1:#+0.284 add 17mn to stats column display so it is rounded up if bigger than 42
                     self.win.addstr(y, i - 1, "▄" * BAR_WIDTH, curses.color_pair(color_pair))
                 elif y == maxyx[0] - VERTICAL_PADDING:
                     self.win.addstr(y, i - 1, "▀" * BAR_WIDTH, curses.color_pair(color_pair))
@@ -156,9 +156,9 @@ class Stats:
         self.win.refresh()
 
     def handleInput(self, cmd):
-        if cmd == "month":
+        if cmd in "month":
             self.state = "month"
-        elif cmd == "week":
+        elif cmd in "week":
             self.state = "week"
         if cmd == "[C":  # Right arrow key
             if self.state == "week":
