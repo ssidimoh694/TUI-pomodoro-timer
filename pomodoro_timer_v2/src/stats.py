@@ -42,10 +42,13 @@ class Stats:
         week_info_str = f"week from {start_date.strftime('%B')} {start_date.day}th to {end_date.strftime('%B')} {end_date.day}th"
 
         stats = [float(seconds) / 3600 for _, seconds in orig_stats]
-        if self.display_date.isocalendar().week < self.date.isocalendar().week:
+        print_debug(str(self.display_date))
+        print_debug(str(self.display_date.isocalendar().week) + "   " + str(self.date.isocalendar().week))
+        if (self.date - self.display_date) >= timedelta(days=7):
             mean_work_hours = sum(stats) / 7
         else:
             mean_work_hours = sum(stats) / (self.date.weekday() + 1)
+
 
         mean_hours = int(mean_work_hours)
         mean_minutes = int((mean_work_hours - mean_hours) * 60)
