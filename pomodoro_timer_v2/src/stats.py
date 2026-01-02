@@ -35,7 +35,8 @@ class Stats:
 
     def draw_week(self, data_manager : DataManager): 
 
-        orig_stats = data_manager.load_week(self.display_date.isocalendar().week, self.display_date.year)
+        iso_year, iso_week, _ = self.display_date.isocalendar()
+        orig_stats = data_manager.load_week(iso_week, iso_year)
 
         start_date = datetime.strptime(orig_stats[0][0], "%d/%m/%Y")
         end_date = datetime.strptime(orig_stats[6][0], "%d/%m/%Y")

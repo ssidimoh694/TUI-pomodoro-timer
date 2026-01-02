@@ -26,22 +26,24 @@ class DataManager:
                   Returns an empty list if no data is found for the week.
         """
         # Get the absolute path of the JSON file
-        year_path_file = self.path_folder + str(year) + ".json"
-        week_data = []
-        try:
-            with open(year_path_file, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-        except FileNotFoundError:
-            data = {}  # Return empty list if the file does not exist
-
         start_date = date.fromisocalendar(year, int(week_nbr), 1)
-        for i in range(7):
-            key = (start_date + timedelta(days=i)).strftime("%d/%m/%Y")
-            if key in data:
-                week_data.append((key,data[key]))
-            else:
-                week_data.append((key, 0))
-    
+        dates = [start_date + timedelta(days=i) for i in range(7)]
+        years_needed = {d.year for d in dates}
+
+        data_by_year = {}
+        for y in years_needed:
+            year_path_file = self.path_folder + str(y) + ".json"
+            try:
+                with open(year_path_file, 'r', encoding='utf-8') as f:
+                    data_by_year[y] = json.load(f)
+            except FileNotFoundError:
+                data_by_year[y] = {}
+
+        week_data = []
+        for d in dates:
+            key = d.strftime("%d/%m/%Y")
+            week_data.append((key, data_by_year.get(d.year, {}).get(key, 0)))
+
         return week_data
     
     def load_month(self, month_nbr, year) -> list[tuple[str, int]]:
@@ -171,4 +173,3 @@ class DataManager:
         with open(temp_file, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
         os.replace(temp_file, year_path_file)
-    
