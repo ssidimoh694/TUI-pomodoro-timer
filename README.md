@@ -18,58 +18,6 @@ This is a command-line Pomodoro Timer application built with Python and the `cur
 <img width="330" height="127" alt="image" src="https://github.com/user-attachments/assets/bd3b3964-b0a4-4d7e-9409-8fc02cc510bc" />
 <img width="260" height="127" alt="image" src="https://github.com/user-attachments/assets/a8908c4d-29bf-4250-9857-70e3cc62824c" />
 
-## Compatibility
-The main branch is compatible with Linux and MAC OS.
-The Windows branch is compatible with any Window's version.
-
-## Requirements
-
-Before running the application, ensure you have the following:
-
-*   **Python 3.6 or higher**: The application is written in Python 3.
-*   **`curses` Library**: This library is usually pre-installed on Linux and macOS. For Windows, you might need to install it.
-*   **firefox**: The app opens a break firefox window when work time is finished.
-
-### Installing Dependencies
-
-1.  **Check Python Version**:
-
-    ```bash
-    python3 --version
-    ```
-
-2.  **Install `curses` (if needed)**:
-
-    *   **Linux**: Usually pre-installed.
-    *   **macOS**: Usually pre-installed.
-    *   **Windows**:
-
-        *   Install the `windows-curses` package:
-
-            ```bash
-            pip install windows-curses
-            ```
-
-    *   `datetime` (usually pre-installed)
-    *   `json` (usually pre-installed)
-    *   `curses` (see above for installation instructions)
-3. **Install firefox**:
-    sudo apt install firefox
-
-## Running the Application
-
-1.  **Navigate to the Project Directory**:
-
-    ```bash
-    cd pomodoro_timer_v2
-    ```
-
-2.  **Run the Application**:
-
-    ```bash
-    python3 src/application.py
-    ```
-
 ## Application Tutorial
 
 ### Initializing the Application
@@ -119,6 +67,7 @@ The following commands are available during runtime:
 *   `set` : can set current work time. the app will prompt you to enter time.
 *   `mode` : change work/break duration. the app will prompt you to enter new mode.
 We can enter partial commands and it will guess closest one. For e.g "n" instead of "next", or "r" or "res" instead of "resume"
+
 ### Data Storage
 
 The application stores work time data in JSON files located in the `data` directory. Each file is named according to the year (e.g., `work_time_2025.json`). The data is organized by date, with each date associated with the total work time in seconds.
@@ -140,3 +89,70 @@ Example `work_time_2025.json` file:
     "30/07/2025": 7200,
     "31/07/2025": 25200
 }
+``
+
+## Compatibility
+The main branch is compatible with **Linux**.
+
+for **MAC OS and Windows** please use the **no-break-popup branch**. 
+This other version does not have the break pop-up at the end of a cycle.
+
+## Requirements
+
+Before running the application, ensure you have the following:
+
+*   **Python 3.6 or higher**: The application is written in Python 3.
+*   **`curses` Library**: This library is usually pre-installed on Linux and macOS. For Windows, you might need to install it.
+*   **firefox**: The app opens a break firefox window when work time is finished.
+
+### Installing Dependencies
+
+1.  **Check Python Version**:
+
+    ```bash
+    python3 --version
+    ```
+
+2.  **Install `curses` (if needed)**:
+
+    *   **Linux**: Usually pre-installed.
+    *   **macOS**: Usually pre-installed.
+    *   **Windows**:
+
+        *   Install the `windows-curses` package:
+
+            ```bash
+            pip install windows-curses
+            ```
+
+    *   `datetime` (usually pre-installed)
+    *   `json` (usually pre-installed)
+    *   `curses` (see above for installation instructions)
+3. **Install firefox**:
+    sudo apt install firefox
+
+## Running the Application
+
+1.  **Navigate to the Project Directory**:
+
+    ```bash
+    cd pomodoro_timer_v2
+    ```
+
+2.  **Run the Application**:
+
+    ```bash
+    python3 src/application.py
+    ```
+## Convenient Launch
+create the pomodoro.sh file with this script :
+```bash
+cd <path-to-folder>/pomodoro-timer/pomodoro_timer_v2
+python3 application.py
+``
+
+make it executable :
+```
+chmod +x pomodoro.sh
+```
+
