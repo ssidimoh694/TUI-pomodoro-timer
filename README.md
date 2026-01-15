@@ -89,7 +89,8 @@ Example `work_time_2025.json` file:
     "30/07/2025": 7200,
     "31/07/2025": 25200
 }
-``
+
+```
 
 ## Compatibility
 The main branch is compatible with **Linux**.
@@ -145,14 +146,19 @@ Before running the application, ensure you have the following:
     python3 src/application.py
     ```
 ## Convenient Launch
-create the pomodoro.sh file with this script :
+create a pomodoro.sh file with this script :
 ```bash
 cd <path-to-folder>/pomodoro-timer/pomodoro_timer_v2
 python3 application.py
-``
+```
 
 make it executable :
 ```
 chmod +x pomodoro.sh
+```
+
+You can now open terminal and launch 
+```
+./pomodoro.sh
 ```
 
