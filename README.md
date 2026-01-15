@@ -16,7 +16,7 @@ This is a command-line Pomodoro Timer application built with Python and the `cur
 <img width="330" height="127" alt="Capture d’écran du 2026-01-15 19-21-17" src="https://github.com/user-attachments/assets/a7f9c9c4-b5c7-411d-859d-7bf69025b1a9" />
 <img width="330" height="127" alt="Capture d’écran du 2026-01-15 19-21-26" src="https://github.com/user-attachments/assets/416d2a1a-228e-4a78-be5f-058de0d1f544" />
 <img width="330" height="127" alt="image" src="https://github.com/user-attachments/assets/bd3b3964-b0a4-4d7e-9409-8fc02cc510bc" />
-<img width="330" height="127" alt="image" src="https://github.com/user-attachments/assets/a8908c4d-29bf-4250-9857-70e3cc62824c" />
+<img width="260" height="127" alt="image" src="https://github.com/user-attachments/assets/a8908c4d-29bf-4250-9857-70e3cc62824c" />
 
 ## Compatibility
 The main branch is compatible with Linux and MAC OS.
