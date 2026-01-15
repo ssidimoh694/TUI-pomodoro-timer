@@ -95,7 +95,7 @@ Example `work_time_2025.json` file:
 ## Compatibility
 The main branch is compatible with **Linux**.
 
-for **MAC OS and Windows** please use the **no-break-popup branch**. 
+for **MAC OS and Windows** please use the **windows-macOS** branch. 
 This other version does not have the break pop-up at the end of a cycle.
 
 ## Requirements
