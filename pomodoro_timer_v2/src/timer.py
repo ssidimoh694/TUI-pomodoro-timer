@@ -205,6 +205,9 @@ class PomodoroTimer:
         total_work_time_str = time.strftime("%H:%M:%S", time.gmtime(math.ceil(self.total_work_time)))
         remaining_time_str = time.strftime("%M:%S", time.gmtime(math.floor(self.remaining_time)))
         progress_bar = ("." * empty) + ("#" * filled)
+        nbr_cycles = self.total_work_time/(self.work_mode[0]*60)
+
+        nbr_cyle_space = "" if nbr_cycles > 100 else " " if nbr_cycles > 9 else "  "
 
         display_mode = '[' + self.state.upper() 
         if self.isPaused:
@@ -231,7 +234,7 @@ class PomodoroTimer:
         y+=1
         self.win.addstr(y, x,f"       ┌─────────────────┐┌─────────────────┘───┘─┐", curses.color_pair(1))
         y+=1
-        self.win.addstr(y, x,f"       │ Pomodoros: {self.total_work_time/(self.work_mode[0]*60):.1f}  ││ Total Work: {total_work_time_str}  │", curses.color_pair(1))
+        self.win.addstr(y, x,f"       │ Pomodoros: {nbr_cycles:3.1f}{nbr_cyle_space}││ Total Work: {total_work_time_str}  │", curses.color_pair(1))
         y+=1
         self.win.addstr(y, x,f"       └─────────────────┘└───────────────────────┘", curses.color_pair(1))
         y+=1
